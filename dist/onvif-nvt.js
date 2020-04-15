@@ -1,4 +1,4 @@
-const Util = require('./utils/util');
+const Util = require("./utils/util");
 
 class OnvifManager {
   constructor() {
@@ -8,8 +8,8 @@ class OnvifManager {
 
   add(name) {
     switch (name) {
-      case 'discovery':
-        const Discovery = require('./modules/discovery');
+      case "discovery":
+        const Discovery = require("./modules/discovery");
 
         this.discovery = new Discovery();
         break;
@@ -19,29 +19,32 @@ class OnvifManager {
     }
   }
 
-  connect(address, port, username, password, servicePath, callback) {
+  connect(address, port, username, password, servicePath, callback, useCache) {
     const promise = new Promise((resolve, reject) => {
-      let errMsg = '';
+      let errMsg = "";
 
-      if (errMsg = Util.isInvalidValue(address, 'string')) {
+      if (errMsg = Util.isInvalidValue(address, "string")) {
         reject(new Error('The "address" argument for connect is invalid: ' + errMsg));
         return;
       }
 
       const c = this.cameras[address];
 
-      if (c) {
+      if (c && useCache) {
         resolve(c);
         return;
       }
 
       port = port || 80;
 
-      const Camera = require('./camera');
+      const Camera = require("./camera");
 
       const camera = new Camera();
       return camera.connect(address, port, username, password, servicePath).then(results => {
-        this.cameras[address] = camera;
+        if (useCache) {
+          this.cameras[address] = camera;
+        }
+
         resolve(camera);
       }).catch(error => {
         console.error(error);
