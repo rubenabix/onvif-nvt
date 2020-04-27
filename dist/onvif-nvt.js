@@ -19,7 +19,7 @@ class OnvifManager {
     }
   }
 
-  connect(address, port, username, password, servicePath, callback, useCache) {
+  connect(address, port, username, password, servicePath, callback) {
     const promise = new Promise((resolve, reject) => {
       let errMsg = "";
 
@@ -28,9 +28,10 @@ class OnvifManager {
         return;
       }
 
-      const c = this.cameras[address];
+      const key = `${address}:${port}:${username}:${password}`;
+      const c = this.cameras[key];
 
-      if (c && useCache) {
+      if (c) {
         resolve(c);
         return;
       }
@@ -41,10 +42,7 @@ class OnvifManager {
 
       const camera = new Camera();
       return camera.connect(address, port, username, password, servicePath).then(results => {
-        if (useCache) {
-          this.cameras[address] = camera;
-        }
-
+        this.cameras[key] = camera;
         resolve(camera);
       }).catch(error => {
         console.error(error);
